@@ -23,6 +23,10 @@ BondxLatexConverterStack(app, "BondxLatexConverterStack",
     #env=cdk.Environment(account='123456789012', region='us-east-1'),
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
-    )
+    env=cdk.Environment(
+        account=os.getenv('CDK_DEFAULT_ACCOUNT'),  # Esto tomará la cuenta de las credenciales configuradas
+        region='us-east-2'
+    ),
+)
 
 app.synth()
