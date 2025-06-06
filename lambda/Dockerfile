@@ -26,6 +26,8 @@ RUN pandoc --version && \
 
 # Copy function code
 COPY handler.py ${LAMBDA_TASK_ROOT}
+COPY reference.docx ${LAMBDA_TASK_ROOT}
+COPY centered.lua ${LAMBDA_TASK_ROOT}
 
 # Set the CMD to your handler
 CMD [ "handler.lambda_handler" ]

@@ -5,7 +5,7 @@ from pathlib import Path
 s3 = boto3.client('s3')
 
 # Nombre correcto del bucket
-BUCKET_NAME = "bondxlatexconverterstack-latexconverterbucketc4c7e-jvtxouhguqp5"
+BUCKET_NAME = "bondx-bucket"
 
 def upload_file(file_path):
     """Sube un archivo a S3"""

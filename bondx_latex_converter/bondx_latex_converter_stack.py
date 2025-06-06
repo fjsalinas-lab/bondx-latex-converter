@@ -4,7 +4,8 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_s3 as s3,
     aws_apigateway as apigw,
-    RemovalPolicy
+    RemovalPolicy,
+    CfnOutput
 )
 from constructs import Construct
 
@@ -29,6 +30,7 @@ class BondxLatexConverterStack(Stack):
         # Función Lambda con Docker
         latex_function = _lambda.DockerImageFunction(
             self, "LatexConverterFunction",
+            function_name="bondx-latex-converter",  # Nombre estático
             code=_lambda.DockerImageCode.from_image_asset("lambda"),
             memory_size=2048,  # 2GB de memoria para procesamiento de LaTeX
             timeout=Duration.minutes(5),  # Timeout de 5 minutos
@@ -54,3 +56,9 @@ class BondxLatexConverterStack(Stack):
         # Endpoint /convert
         convert_integration = apigw.LambdaIntegration(latex_function)
         api.root.add_resource("convert").add_method("POST", convert_integration)
+
+        # Agregar outputs
+        CfnOutput(self, "LambdaFunctionName",
+            value=latex_function.function_name,
+            description="Nombre de la función Lambda"
+        )

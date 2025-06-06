@@ -69,11 +69,23 @@ def lambda_handler(event, context):
             with open(input_file, 'r') as f:
                 logger.info(f.read())
 
-            # Generar DOCX usando pandoc
+            # Usar el archivo de referencia estático y el filtro Lua
+            reference_doc = '/var/task/reference.docx'  # Ruta al archivo en el contenedor Lambda
+            lua_filter = '/var/task/centered.lua'  # Ruta al filtro Lua en el contenedor Lambda
+
+            # Generar DOCX usando pandoc con el documento de referencia y el filtro Lua
             logger.info("Starting DOCX generation...")
             docx_file = os.path.join(temp_dir, 'output.docx')
             result = subprocess.run(
-                ['pandoc', input_file, '-o', docx_file],
+                ['pandoc',
+                 input_file,
+                 '-o', docx_file,
+                 '--from=latex',
+                 '--to=docx',
+                 '--standalone',
+                 f'--reference-doc={reference_doc}',
+                 f'--lua-filter={lua_filter}'
+                ],
                 capture_output=True,
                 text=True
             )
