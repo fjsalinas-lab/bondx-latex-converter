@@ -42,6 +42,13 @@ class BondxLatexConverterStack(Stack):
 
         # Dar permisos a la Lambda para acceder al bucket
         storage_bucket.grant_read_write(latex_function)
+        
+        # También dar permisos para el bucket de desarrollo
+        dev_bucket = s3.Bucket.from_bucket_name(
+            self, "DevBucket",
+            bucket_name="bondx-bucket-dev"
+        )
+        dev_bucket.grant_read_write(latex_function)
 
         # API Gateway REST API
         api = apigw.RestApi(

@@ -1,1 +1,0 @@
-# PDF to PNG Stack Module 
