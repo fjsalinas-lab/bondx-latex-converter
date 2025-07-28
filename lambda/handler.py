@@ -47,8 +47,8 @@ def lambda_handler(event, context):
             
             # Descargar archivo LaTeX de S3
             input_file = os.path.join(temp_dir, 'input.tex')
-            logger.info(f"Downloading {input_key} from bucket {BUCKET_NAME} to {input_file}")
-            s3.download_file(BUCKET_NAME, input_key, input_file)
+            logger.info(f"Downloading {input_key} from bucket {bucket_name} to {input_file}")
+            s3.download_file(bucket_name, input_key, input_file)
 
             # Verificar que es un archivo LaTeX
             mime = magic.Magic(mime=True)

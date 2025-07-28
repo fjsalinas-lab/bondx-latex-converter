@@ -1,5 +1,10 @@
 {
-  "BondxLatexConverterStack": {
-    "LatexConverterApiEndpoint89DB3365": "https://nbd03seupa.execute-api.us-east-1.amazonaws.com/prod/"
+  "BondxPdfToPngStack": {
+    "PdfToPngHealthEndpoint": "https://xfjmqnlxqa.execute-api.us-east-2.amazonaws.com/prod/health",
+    "PdfToPngApiUrl": "https://xfjmqnlxqa.execute-api.us-east-2.amazonaws.com/prod/",
+    "PdfToPngApiEndpoint938BA5C3": "https://xfjmqnlxqa.execute-api.us-east-2.amazonaws.com/prod/",
+    "PdfToPngConvertFastEndpoint": "https://xfjmqnlxqa.execute-api.us-east-2.amazonaws.com/prod/convert-fast",
+    "PdfToPngConvertEndpoint": "https://xfjmqnlxqa.execute-api.us-east-2.amazonaws.com/prod/convert",
+    "PdfToPngFunctionName": "bondx-pdf-to-png-converter"
   }
 }

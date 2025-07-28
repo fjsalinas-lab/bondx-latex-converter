@@ -63,6 +63,26 @@ CONVERT_ENDPOINT=$(aws cloudformation describe-stacks \
     --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngConvertEndpoint`].OutputValue' \
     --output text 2>/dev/null || echo "")
 
+CONVERT_ASYNC_ENDPOINT=$(aws cloudformation describe-stacks \
+    --stack-name BondxPdfToPngStack \
+    --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngConvertAsyncEndpoint`].OutputValue' \
+    --output text 2>/dev/null || echo "")
+
+CONVERT_FAST_ENDPOINT=$(aws cloudformation describe-stacks \
+    --stack-name BondxPdfToPngStack \
+    --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngConvertFastEndpoint`].OutputValue' \
+    --output text 2>/dev/null || echo "")
+
+JOB_STATUS_ENDPOINT=$(aws cloudformation describe-stacks \
+    --stack-name BondxPdfToPngStack \
+    --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngJobStatusEndpoint`].OutputValue' \
+    --output text 2>/dev/null || echo "")
+
+JOBS_ENDPOINT=$(aws cloudformation describe-stacks \
+    --stack-name BondxPdfToPngStack \
+    --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngJobsEndpoint`].OutputValue' \
+    --output text 2>/dev/null || echo "")
+
 HEALTH_ENDPOINT=$(aws cloudformation describe-stacks \
     --stack-name BondxPdfToPngStack \
     --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngHealthEndpoint`].OutputValue' \
@@ -73,6 +93,11 @@ FUNCTION_NAME=$(aws cloudformation describe-stacks \
     --query 'Stacks[0].Outputs[?OutputKey==`PdfToPngFunctionName`].OutputValue' \
     --output text 2>/dev/null || echo "")
 
+JOBS_TABLE_NAME=$(aws cloudformation describe-stacks \
+    --stack-name BondxPdfToPngStack \
+    --query 'Stacks[0].Outputs[?OutputKey==`JobsTableName`].OutputValue' \
+    --output text 2>/dev/null || echo "")
+
 if [ -n "$API_URL" ] && [ -n "$CONVERT_ENDPOINT" ]; then
     echo "✅ Deploy completado exitosamente!"
     echo ""
@@ -81,30 +106,51 @@ if [ -n "$API_URL" ] && [ -n "$CONVERT_ENDPOINT" ]; then
     echo "  - Cuenta AWS: $ACCOUNT_ID"
     echo "  - Región: us-east-2"
     echo "  - API Gateway URL: $API_URL"
-    echo "  - Endpoint Conversión: $CONVERT_ENDPOINT"
-    echo "  - Endpoint Health Check: $HEALTH_ENDPOINT"
     echo "  - Lambda Function: $FUNCTION_NAME"
+    echo "  - DynamoDB Table: $JOBS_TABLE_NAME"
+    echo ""
+    echo "🔗 Endpoints disponibles:"
+    echo "  - Health Check: $HEALTH_ENDPOINT"
+    echo "  - Conversión Estándar: $CONVERT_ENDPOINT"
+    echo "  - Conversión Asíncrona: $CONVERT_ASYNC_ENDPOINT"
+    echo "  - Conversión Rápida: $CONVERT_FAST_ENDPOINT"
+    echo "  - Estado de Jobs: $JOB_STATUS_ENDPOINT"
+    echo "  - Lista de Jobs: $JOBS_ENDPOINT"
     echo ""
     echo "🔧 Configuración para Django settings.py:"
-    echo "  PDF_TO_PNG_API_URL = '$CONVERT_ENDPOINT'"
+    echo "  PDF_TO_PNG_API_BASE_URL = '$API_URL'"
+    echo "  PDF_TO_PNG_CONVERT_ENDPOINT = '$CONVERT_ENDPOINT'"
+    echo "  PDF_TO_PNG_ASYNC_ENDPOINT = '$CONVERT_ASYNC_ENDPOINT'"
+    echo "  PDF_TO_PNG_FAST_ENDPOINT = '$CONVERT_FAST_ENDPOINT'"
+    echo "  PDF_TO_PNG_STATUS_ENDPOINT = '$JOB_STATUS_ENDPOINT'"
+    echo "  PDF_TO_PNG_JOBS_ENDPOINT = '$JOBS_ENDPOINT'"
     echo ""
     echo "🧪 Para probar el microservicio:"
     echo ""
     echo "1. Health Check:"
     echo "   curl $HEALTH_ENDPOINT"
     echo ""
-    echo "2. Conversión PDF a PNG:"
-    echo '   curl -X POST "'$CONVERT_ENDPOINT'" \'
+    echo "2. Conversión Asíncrona (RECOMENDADO para documentos grandes):"
+    echo '   curl -X POST "'$CONVERT_ASYNC_ENDPOINT'" \'
     echo '     -H "Content-Type: application/json" \'
-    echo '     -d "{\"pdf_s3_key\": \"path/to/document.pdf\", \"bucket_name\": \"bondx-bucket\"}"'
+    echo '     -d "{\"pdf_s3_key\": \"documents/cronograma.pdf\", \"bucket_name\": \"bondx-bucket\"}"'
     echo ""
-    echo "📚 Ejemplo de uso desde Python:"
-    echo "   import requests"
-    echo "   response = requests.post('$CONVERT_ENDPOINT', json={"
-    echo "       'pdf_s3_key': 'documents/sample.pdf',"
-    echo "       'bucket_name': 'bondx-bucket'"
-    echo "   })"
-    echo "   print(response.json())"
+    echo "3. Verificar estado de job (usar job_id del paso anterior):"
+    echo '   curl "'$JOB_STATUS_ENDPOINT/JOB_ID_HERE'"'
+    echo ""
+    echo "4. Conversión Rápida (para documentos pequeños):"
+    echo '   curl -X POST "'$CONVERT_FAST_ENDPOINT'" \'
+    echo '     -H "Content-Type: application/json" \'
+    echo '     -d "{\"pdf_base64\": \"JVBERi0xLjQK...\", \"dpi\": 150}"'
+    echo ""
+    echo "📚 Ejemplo de uso desde Python (procesamiento asíncrono):"
+    echo "   from client.pdf_to_png_client import convert_pdf_to_png_async_and_wait"
+    echo "   result = convert_pdf_to_png_async_and_wait("
+    echo "       pdf_s3_key='documents/cronograma.pdf',"
+    echo "       bucket_name='bondx-bucket',"
+    echo "       async_api_endpoint='$CONVERT_ASYNC_ENDPOINT',"
+    echo "       status_api_endpoint='$JOB_STATUS_ENDPOINT'"
+    echo "   )"
 else
     echo "⚠️  Deploy completado pero no se pudieron obtener todos los outputs"
     echo "Puedes obtenerlos manualmente desde la consola AWS CloudFormation"
